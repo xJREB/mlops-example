@@ -3,7 +3,7 @@ name: Run ML Pipeline
 on: [push]
 
 jobs:
-  build-linux:
+  ml-pipeline-ubuntu:
     runs-on: ubuntu-latest
 
     steps:
