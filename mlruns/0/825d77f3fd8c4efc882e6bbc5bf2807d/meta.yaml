@@ -1,0 +1,15 @@
+artifact_uri: file:///C:/dev/workspace/iste-se/mlops-example/mlruns/0/825d77f3fd8c4efc882e6bbc5bf2807d/artifacts
+end_time: 1656593151452
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+name: ''
+run_id: 825d77f3fd8c4efc882e6bbc5bf2807d
+run_uuid: 825d77f3fd8c4efc882e6bbc5bf2807d
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1656593149351
+status: 3
+tags: []
+user_id: Justus Bogner
