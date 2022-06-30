@@ -27,48 +27,52 @@ def eval_metrics(actual, pred):
 warnings.filterwarnings("ignore")
 np.random.seed(40)
 
-# Read the wine-quality csv file from the URL
-csv_url = (
-    "http://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"
-)
+# read the wine-quality csv file from the local directory (needs to have been imported and pulled with DVC)
 try:
-    data = pd.read_csv(csv_url, sep=";")
+    data = pd.read_csv("winequality-red.csv", sep=";")
 except Exception as e:
     logger.exception(
-        "Unable to download training & test CSV, check your internet connection. Error: %s", e
+        "Unable to find CSV file! Have you imported it with DVC? Error: %s", e
     )
 
-# Split the data into training and test sets. (0.75, 0.25) split.
+# split the data into training and test sets (0.75 and 0.25)
 train, test = train_test_split(data)
 
-# The predicted column is "quality" which is a scalar from [3, 9]
+# the column to be predicted is "quality" which is a scalar from [3, 9]
 train_x = train.drop(["quality"], axis=1)
 test_x = test.drop(["quality"], axis=1)
 train_y = train[["quality"]]
 test_y = test[["quality"]]
 
-alpha = float(sys.argv[1]) if len(sys.argv) > 1 else 0.01
-l1_ratio = float(sys.argv[2]) if len(sys.argv) > 2 else 0.01
+# start training loop to test 10 different hyperparameter settings
+for x in range(10):
 
-with mlflow.start_run():
-    lr = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, random_state=42)
-    lr.fit(train_x, train_y)
+    # set hyperparameters based on loop variable
+    alpha = 0.01 + x / 10
+    l1_ratio = 0.01 + x / 10
 
-    predicted_qualities = lr.predict(test_x)
+    with mlflow.start_run():
+        # instantiate the model
+        lr = ElasticNet(alpha=alpha, l1_ratio=l1_ratio, random_state=42)
+        # train the model with the training data
+        lr.fit(train_x, train_y)
+        # evaluate the model on the test data
+        predicted_qualities = lr.predict(test_x)
+        # calculate evaluation metrics based on prediction results
+        (rmse, mae, r2) = eval_metrics(test_y, predicted_qualities)
 
-    (rmse, mae, r2) = eval_metrics(test_y, predicted_qualities)
+        print("Training loop #%s" % (x + 1))
+        print("  Elasticnet model (alpha=%f, l1_ratio=%f):" % (alpha, l1_ratio))
+        print("    RMSE: %s" % rmse)
+        print("    MAE: %s" % mae)
+        print("    R2: %s" % r2)
 
-    print("Elasticnet model (alpha=%f, l1_ratio=%f):" % (alpha, l1_ratio))
-    print("  RMSE: %s" % rmse)
-    print("  MAE: %s" % mae)
-    print("  R2: %s" % r2)
+        # log experiment params and metrics
+        mlflow.log_param("alpha", alpha)
+        mlflow.log_param("l1_ratio", l1_ratio)
+        mlflow.log_metric("rmse", rmse)
+        mlflow.log_metric("r2", r2)
+        mlflow.log_metric("mae", mae)
 
-    # log experiment params and metrics
-    mlflow.log_param("alpha", alpha)
-    mlflow.log_param("l1_ratio", l1_ratio)
-    mlflow.log_metric("rmse", rmse)
-    mlflow.log_metric("r2", r2)
-    mlflow.log_metric("mae", mae)
-
-    # store the model
-    mlflow.sklearn.log_model(lr, "model")
+        # store the model
+        mlflow.sklearn.log_model(lr, "model")
