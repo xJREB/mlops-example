@@ -23,3 +23,5 @@ jobs:
       run: dvc pull
     - name: Install Python dependencies
       run: pip install -r requirements.txt
+    - name: Run training script
+      run: python src/train.py
