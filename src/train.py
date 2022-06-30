@@ -8,6 +8,7 @@ from sklearn.linear_model import ElasticNet
 import mlflow
 import mlflow.sklearn
 import logging
+import sys
 
 logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
