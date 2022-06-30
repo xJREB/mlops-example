@@ -1,8 +1,5 @@
 # adapted from https://github.com/mlflow/mlflow/blob/master/examples/sklearn_elasticnet_wine/train.py
 
-import warnings
-import sys
-
 import pandas as pd
 import numpy as np
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
@@ -10,7 +7,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import ElasticNet
 import mlflow
 import mlflow.sklearn
-
 import logging
 
 logging.basicConfig(level=logging.WARN)
@@ -18,16 +14,19 @@ logger = logging.getLogger(__name__)
 
 
 def eval_metrics(actual, pred):
+    # Root Mean Square Error (https://en.wikipedia.org/wiki/Root-mean-square_deviation)
     rmse = np.sqrt(mean_squared_error(actual, pred))
+    # Mean Absolute Error (https://en.wikipedia.org/wiki/Mean_absolute_error)
     mae = mean_absolute_error(actual, pred)
+    # R squared / Coefficient of Determination (https://en.wikipedia.org/wiki/Coefficient_of_determination)
     r2 = r2_score(actual, pred)
     return rmse, mae, r2
 
 
-warnings.filterwarnings("ignore")
+# set fixed random seed for numpy for reproducibility
 np.random.seed(40)
 
-# read the wine-quality csv file from the local directory (needs to have been imported and pulled with DVC)
+# read the csv file from the local directory (needs to have been imported / pulled with DVC)
 try:
     data = pd.read_csv("winequality-red.csv", sep=";")
 except Exception as e:
@@ -47,7 +46,7 @@ test_y = test[["quality"]]
 # start training loop to test 10 different hyperparameter settings
 for x in range(10):
 
-    # set hyperparameters based on loop variable
+    # set hyperparameters based on loop variable (0.01 to 0.91)
     alpha = 0.01 + x / 10
     l1_ratio = 0.01 + x / 10
 
